@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600">
+  <rect width="480" height="600" fill="#ffe566"/>
+  <path d="M60 480l90-40 40 70-80 30z" fill="#3d3d3d"/>
+  <path d="M150 440l70-160 50 20-40 150z" fill="#00b3a4"/>
+  <circle cx="250" cy="230" r="48" fill="#f2b88c"/>
+  <path d="M210 185c10-30 30-40 50-38 25 2 45 22 50 50L290 250H210z" fill="#222"/>
+  <path d="M290 300l90-20 20 40-80 30z" fill="#00b3a4"/>
+  <path d="M380 280l40-90 12 6-28 95z" fill="#c9a227"/>
+  <rect x="24" y="24" width="432" height="552" fill="none" stroke="#111" stroke-width="8"/>
+  <path d="M60 480l90-40 40 70-80 30z" fill="none" stroke="#111" stroke-width="6"/>
+  <path d="M150 440l70-160 50 20-40 150z" fill="none" stroke="#111" stroke-width="6"/>
+  <circle cx="250" cy="230" r="48" fill="none" stroke="#111" stroke-width="6"/>
+  <path d="M220 210h20M260 210h20M230 245c8 10 20 12 30 0" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+  <path d="M290 300l90-20 20 40-80 30z" fill="none" stroke="#111" stroke-width="6"/>
+  <path d="M380 280l40-90" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round"/>
+  <path d="M70 120l40 20M100 90l20 40M400 140l-30 25M430 180l-45 5" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600">
+  <rect width="480" height="600" fill="#9fd3ff"/>
+  <circle cx="370" cy="90" r="36" fill="#ffe566"/>
+  <path d="M40 520V280h70v240z" fill="#5a6b8c"/>
+  <path d="M120 520V180h80v340z" fill="#2f3b55"/>
+  <path d="M210 520V240h60v280z" fill="#6d7f9e"/>
+  <path d="M280 520V140h90v380z" fill="#243147"/>
+  <path d="M380 520V300h60v220z" fill="#4c5d7a"/>
+  <path d="M30 520h420v40H30z" fill="#3a3a3a"/>
+  <path d="M140 220h20v30h-20zM160 280h20v30h-20zM300 200h25v35h-25zM340 260h25v35h-25zM400 340h20v28h-20z" fill="#ffe566"/>
+  <rect x="24" y="24" width="432" height="552" fill="none" stroke="#111" stroke-width="8"/>
+  <path d="M40 520V280h70v240M120 520V180h80v340M210 520V240h60v280M280 520V140h90v380M380 520V300h60v220" fill="none" stroke="#111" stroke-width="6"/>
+  <path d="M140 220h20v30h-20zM160 280h20v30h-20zM300 200h25v35h-25zM340 260h25v35h-25zM400 340h20v28h-20z" fill="none" stroke="#111" stroke-width="4"/>
+  <path d="M30 520h420" fill="none" stroke="#111" stroke-width="8"/>
+  <circle cx="370" cy="90" r="36" fill="none" stroke="#111" stroke-width="6"/>
+</svg>
