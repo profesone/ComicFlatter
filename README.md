@@ -1,8 +1,14 @@
-# ComicFlats
+# Comic-Subs
 
-Upload black-and-white comic line art and get flat-color PNGs for Photoshop and Clip Studio.
+Helping comic creators, create comics.
 
-**$4.99** one-time · up to **4** attempts · PHP 8.4+ on DreamHost Shared.
+Comic-Subs is a studio suite for people making comics. It takes the slow production chores off the page so a creator can stay with the story: flatting a penciled page, placing word balloons, and finding other creators to hire.
+
+- **Comic Flatter** turns black-and-white line art into flat-color PNGs for Photoshop and Clip Studio. **$4.99** per page, up to **4** attempts, and several pages can be bought at once.
+- **Comic Balloon Popper** maps a script onto a page and draws a transparent balloon overlay.
+- **Creator board** is a free listing board. Anyone can read posts. A logged-in user can publish one.
+
+PHP 8.4+ on DreamHost Shared. Operated by 500 Lines Media LLC.
 
 ## Stack
 
