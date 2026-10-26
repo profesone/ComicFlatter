@@ -12,6 +12,3 @@
   Header set X-Frame-Options "SAMEORIGIN"
   Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 </IfModule>
-
-php_value upload_max_filesize 20M
-php_value post_max_size 22M
