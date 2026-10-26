@@ -19,7 +19,7 @@ PHP 8.4+ on DreamHost Shared. Operated by 500 Lines Media LLC.
 - Imagick flatting pipeline (binarize, flood-fill regions, trap, strip inks)
 - Email/password accounts (Argon2id)
 
-## Local 
+## Local
 
 ```bash
 composer install
