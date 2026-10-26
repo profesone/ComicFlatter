@@ -7,10 +7,10 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install PHP and Composer
         uses: shivammathur/setup-php@v2
@@ -20,7 +20,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -30,10 +30,25 @@ jobs:
       - name: Install production dependencies
         run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
-      - name: Start SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+      - name: Load the deploy key
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r' | sed -e 's/^"//' -e 's/"$//' -e 's/\\n/\n/g' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if ! grep -q 'PRIVATE KEY' ~/.ssh/deploy_key; then
+            echo "DEPLOY_SSH_KEY is not an OpenSSH private key."
+            echo "Paste the file that starts with BEGIN OPENSSH PRIVATE KEY or BEGIN RSA PRIVATE KEY."
+            echo "Do not paste the .pub file, a .ppk file, or a key that asks for a passphrase."
+            exit 1
+          fi
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/deploy_key
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+          rm -f ~/.ssh/deploy_key
 
       - name: Add host key to known_hosts
         run: |
