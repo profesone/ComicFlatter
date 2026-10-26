@@ -10,7 +10,7 @@ Comic-Subs is a studio suite for people making comics. It takes the slow product
 
 PHP 8.4+ on DreamHost Shared. Operated by 500 Lines Media LLC.
 
-## Stack 
+## Stack
 
 - Vanilla PHP 8.4 (front controller in `public/`)
 - MySQL 8 (PDO)
