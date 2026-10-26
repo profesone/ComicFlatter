@@ -42,10 +42,13 @@ final class Controllers
 
     public static function balloons(): void
     {
+        $user = Auth::user();
         View::render('balloons', [
             'title' => 'Comic Balloon Popper — Comic-Subs',
-            'user' => Auth::user(),
+            'user' => $user,
             'csrf' => Csrf::token(),
+            'freeMode' => Env::bool('FREE_MODE'),
+            'credits' => $user ? (new JobRepository())->balloonCreditCount($user['id']) : 0,
         ]);
     }
 
@@ -113,10 +116,16 @@ final class Controllers
             self::json(['error' => 'Page file is missing.'], 404);
         }
         $lines = is_array($payload['lines'] ?? null) ? $payload['lines'] : [];
+        $jobs = new JobRepository();
+        $credit = $jobs->openBalloonCredit($user['id']);
+        if ($credit === null) {
+            self::json(['error' => 'Buy a page before drawing balloons.'], 402);
+        }
         try {
             @set_time_limit(120);
             $png = (new ComicLetterer())->render($absolute, (int) ($payload['panelCount'] ?? 1), $lines);
             $out = Storage::save('balloons/' . $user['id'] . '/overlays', $png, 'png');
+            $jobs->useBalloonCredit($credit);
             self::json(['overlayUrl' => '/uploads/' . $out]);
         } catch (\Throwable $e) {
             self::json(['error' => $e->getMessage()], 500);
@@ -367,6 +376,7 @@ final class Controllers
             'title' => 'Profile · Comic-Subs',
             'user' => $user,
             'purchases' => (new JobRepository())->purchasesFor($user['id']),
+            'balloonPurchases' => (new JobRepository())->balloonPurchases($user['id']),
             'error' => $_SESSION['account_error'] ?? null,
             'saved' => $_SESSION['account_saved'] ?? null,
         ]);
@@ -469,6 +479,15 @@ final class Controllers
         $user = Auth::requireUser();
         $jobs = new JobRepository();
         $quantity = max(1, min(12, (int) ($_POST['quantity'] ?? 1)));
+        $product = ($_POST['product'] ?? '') === 'balloon' ? 'balloon' : 'flatter';
+        if (Env::bool('FREE_MODE') && $product === 'balloon') {
+            $session = 'free_' . bin2hex(random_bytes(8));
+            for ($i = 0; $i < $quantity; $i++) {
+                $jobs->createBalloonCredit($user['id'], $session, 'paid');
+            }
+            header('Location: /balloons');
+            return;
+        }
         if (Env::bool('FREE_MODE')) {
             $last = $jobs->createFree($user['id']);
             for ($i = 1; $i < $quantity; $i++) {
@@ -489,15 +508,19 @@ final class Controllers
             'mode' => 'payment',
             'line_items' => [[
                 'quantity' => $quantity,
-                'price' => self::stripePriceId('COMICFLATTER_PRICE_ID'),
+                'price' => self::stripePriceId($product === 'balloon' ? 'COMICBALLOON_POPPER_PRICE_ID' : 'COMICFLATTER_PRICE_ID'),
             ]],
             'success_url' => $app . '/checkout/success?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => $app . '/#pricing',
+            'cancel_url' => $app . ($product === 'balloon' ? '/balloons' : '/#pricing'),
             'customer_email' => $user['email'],
-            'metadata' => ['user_id' => $user['id'], 'product' => 'comicflats_job', 'quantity' => (string) $quantity],
+            'metadata' => ['user_id' => $user['id'], 'product' => $product, 'quantity' => (string) $quantity],
         ]);
         for ($i = 0; $i < $quantity; $i++) {
-            $jobs->createPending($user['id'], $session->id);
+            if ($product === 'balloon') {
+                $jobs->createBalloonCredit($user['id'], $session->id);
+            } else {
+                $jobs->createPending($user['id'], $session->id);
+            }
         }
         header('Location: ' . $session->url);
     }
@@ -523,15 +546,22 @@ final class Controllers
         $user = Auth::requireUser();
         $sessionId = (string) ($_GET['session_id'] ?? '');
         $key = Env::get('STRIPE_SECRET_KEY');
+        $product = 'flatter';
         if ($sessionId !== '' && $key && !str_contains($key, '...')) {
             Stripe::setApiKey($key);
             $session = Session::retrieve($sessionId);
+            $product = (string) ($session->metadata->product ?? 'flatter');
             if (($session->payment_status ?? '') === 'paid') {
                 $pi = is_string($session->payment_intent) ? $session->payment_intent : null;
-                (new JobRepository())->markPaid($sessionId, $pi);
+                $jobs = new JobRepository();
+                if ($product === 'balloon') {
+                    $jobs->markBalloonPaid($sessionId, $pi);
+                } else {
+                    $jobs->markPaid($sessionId, $pi);
+                }
             }
         }
-        header('Location: /studio');
+        header('Location: ' . ($product === 'balloon' ? '/balloons' : '/studio'));
     }
 
     public static function webhook(): void
@@ -557,7 +587,13 @@ final class Controllers
             $session = $event->data->object;
             if (($session->payment_status ?? '') === 'paid' || ($session->status ?? '') === 'complete') {
                 $pi = is_string($session->payment_intent ?? null) ? $session->payment_intent : null;
-                (new JobRepository())->markPaid((string) $session->id, $pi);
+                $jobs = new JobRepository();
+                $product = (string) ($session->metadata->product ?? 'flatter');
+                if ($product === 'balloon') {
+                    $jobs->markBalloonPaid((string) $session->id, $pi);
+                } else {
+                    $jobs->markPaid((string) $session->id, $pi);
+                }
             }
         }
         header('Content-Type: application/json');

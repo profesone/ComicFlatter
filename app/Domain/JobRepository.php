@@ -72,6 +72,58 @@ final class JobRepository
         return $row ?: null;
     }
 
+    public function createBalloonCredit(string $userId, string $sessionId, string $status = 'pending_payment'): void
+    {
+        $stmt = Db::pdo()->prepare(
+            'INSERT INTO balloon_credits (id, user_id, stripe_session_id, status) VALUES (?, ?, ?, ?)'
+        );
+        $stmt->execute([UserRepository::uuid(), $userId, $sessionId, $status]);
+    }
+
+    public function markBalloonPaid(string $stripeSessionId, ?string $paymentIntent): void
+    {
+        $stmt = Db::pdo()->prepare(
+            "UPDATE balloon_credits SET status = 'paid', stripe_payment_intent_id = COALESCE(?, stripe_payment_intent_id)
+             WHERE stripe_session_id = ? AND status = 'pending_payment'"
+        );
+        $stmt->execute([$paymentIntent, $stripeSessionId]);
+    }
+
+    public function openBalloonCredit(string $userId): ?string
+    {
+        $stmt = Db::pdo()->prepare(
+            "SELECT id FROM balloon_credits WHERE user_id = ? AND status = 'paid' ORDER BY created_at ASC LIMIT 1"
+        );
+        $stmt->execute([$userId]);
+        $id = $stmt->fetchColumn();
+        return is_string($id) ? $id : null;
+    }
+
+    public function useBalloonCredit(string $id): void
+    {
+        $stmt = Db::pdo()->prepare("UPDATE balloon_credits SET status = 'used' WHERE id = ? AND status = 'paid'");
+        $stmt->execute([$id]);
+    }
+
+    public function balloonCreditCount(string $userId): int
+    {
+        $stmt = Db::pdo()->prepare("SELECT COUNT(*) FROM balloon_credits WHERE user_id = ? AND status = 'paid'");
+        $stmt->execute([$userId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function balloonPurchases(string $userId): array
+    {
+        $stmt = Db::pdo()->prepare(
+            "SELECT status, created_at FROM balloon_credits
+             WHERE user_id = ? AND status <> 'pending_payment'
+             ORDER BY created_at DESC"
+        );
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
     public function markPaid(string $stripeSessionId, ?string $paymentIntent): void
     {
         $stmt = Db::pdo()->prepare(

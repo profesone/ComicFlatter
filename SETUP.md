@@ -40,7 +40,16 @@ chmod -R u+rwX storage
 
 ## Flatting pipeline
 
-Generation runs in PHP with the **Imagick** extension (required). Confirm with `php -m | grep imagick`.
+Generation runs in PHP with the **Imagick** extension (required). On DreamHost Shared you cannot compile it. Enable the copy DreamHost already provides:
+
+```bash
+mkdir -p ~/.php/8.5
+echo "extension = imagick.so" >> ~/.php/8.5/phprc
+killall php85.cgi || true
+/usr/local/php85/bin/php -m | grep imagick
+```
+
+Use `~/.php/8.4/phprc` and `php84.cgi` if the domain is still on PHP 8.4. The panel PHP version and this file must match.
 
 Each upload is turned into:
 

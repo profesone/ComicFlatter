@@ -34,7 +34,18 @@
         <?php endforeach; ?>
       </ul>
     <?php else: ?>
-      <p>No purchases yet.</p>
+      <p>No Flatter purchases yet.</p>
+    <?php endif; ?>
+    <?php if (!empty($balloonPurchases)): ?>
+      <ul class="role-list">
+        <?php foreach ($balloonPurchases as $purchase): ?>
+          <li>
+            <span>$4.99</span>
+            <strong>Balloon Popper</strong>
+            <em><?= e($purchase['status']) ?> · <?= e($purchase['created_at']) ?></em>
+          </li>
+        <?php endforeach; ?>
+      </ul>
     <?php endif; ?>
     <p>If you delete this account and later create it again with the same email, these purchases stay on the account.</p>
 

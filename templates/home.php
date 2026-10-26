@@ -2,7 +2,7 @@
   <div class="wrap">
     <p class="kicker">Studio suite</p>
     <h1 class="display portal-title">Comic-Subs</h1>
-    <p class="lede portal-lede">Three tools for comic production. Flatting and the creator board are open. Balloon placement is in progress.</p>
+    <p class="lede portal-lede">Three tools for comic production. Flatting, balloon placement, and the creator board are open.</p>
   </div>
 </section>
 <section class="section">
@@ -13,7 +13,7 @@
       <p>Turn black-and-white line art into hard-edged color flats.</p>
     </a>
     <a class="portal-card portal-card-blush" href="/balloons">
-      <p class="kicker">In progress</p>
+      <p class="kicker">Open</p>
       <h2 class="display">Comic Balloon Popper</h2>
       <p>Place word balloons on a comic page without covering the art.</p>
     </a>
@@ -27,7 +27,7 @@
 <section id="pricing" class="section pricing">
   <div class="wrap">
     <h2 class="display">Same simple tier</h2>
-    <p>Comic Flatter is $4.99 per page. The creator board is free to read and to post. Balloon Popper is not for sale yet.</p>
+    <p>Comic Flatter and Balloon Popper are $4.99 per page. The creator board is free to read and to post.</p>
     <div class="tier-row">
       <article class="price-card">
         <p class="kicker">Open</p>
@@ -37,11 +37,11 @@
         <a class="btn" href="/flatter">Open Flatter</a>
       </article>
       <article class="price-card">
-        <p class="kicker">In progress</p>
+        <p class="kicker">Open</p>
         <h3 class="display">Balloon Popper</h3>
         <p class="display price">$4.99</p>
-        <p>Per page, when balloon placement opens.</p>
-        <a class="btn secondary" href="/balloons">See the plan</a>
+        <p>Per page. Buy a page, then draw the overlay.</p>
+        <a class="btn secondary" href="/balloons">Open Balloon Popper</a>
       </article>
       <article class="price-card">
         <p class="kicker">Open</p>
