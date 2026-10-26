@@ -36,7 +36,12 @@ jobs:
         run: |
           set -euo pipefail
           install -m 700 -d ~/.ssh
-          printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r' | sed -e 's/^"//' -e 's/"$//' -e 's/\\n/\n/g' > ~/.ssh/deploy_key
+          printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r' | sed -e 's/^"//' -e 's/"$//' -e 's/\\n/\n/g' \
+            | awk '
+                /-----BEGIN/ {print; keep=1; next}
+                /-----END/ {print; keep=0; next}
+                keep {gsub(/[ \t]/, ""); if (length($0) > 0) print}
+              ' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           if ! grep -q 'PRIVATE KEY' ~/.ssh/deploy_key; then
             echo "DEPLOY_SSH_KEY is not an OpenSSH private key."
@@ -44,6 +49,34 @@ jobs:
             echo "Do not paste the .pub file, a .ppk file, or a key that asks for a passphrase."
             exit 1
           fi
+          python3 - << 'PY'
+          import textwrap
+          exec(textwrap.dedent("""
+              import base64, pathlib, sys
+              text = pathlib.Path("/home/runner/.ssh/deploy_key").read_text(errors="replace")
+              if "ENCRYPTED" in text:
+                  print("This private key has a passphrase. Create one with: ssh-keygen -t ed25519 -N \\"\\"")
+                  sys.exit(1)
+              if "OPENSSH PRIVATE KEY" in text:
+                  body = "".join(line for line in text.splitlines() if not line.startswith("-----"))
+                  try:
+                      raw = base64.b64decode(body, validate=True)
+                  except Exception:
+                      print("The key text between the BEGIN and END lines is not valid base64.")
+                      print("Generate a new key and paste the private file again, with its line breaks.")
+                      sys.exit(1)
+                  if not raw.startswith(b"openssh-key-v1\\0"):
+                      print("The key banner says OpenSSH, but the body is not an OpenSSH key.")
+                      sys.exit(1)
+                  rest = raw[len(b"openssh-key-v1\\0"):]
+                  length = int.from_bytes(rest[:4], "big")
+                  cipher = rest[4:4 + length].decode(errors="replace")
+                  print("OpenSSH private key cipher: " + cipher)
+                  if cipher != "none":
+                      print("This private key has a passphrase. Create one with: ssh-keygen -t ed25519 -N \\"\\"")
+                      sys.exit(1)
+          """))
+          PY
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/deploy_key
           echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
